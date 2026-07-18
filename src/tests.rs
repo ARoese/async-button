@@ -10,6 +10,7 @@ const CONFIG: ButtonConfig = ButtonConfig {
     debounce: Duration::from_millis(10),
     double_click: Duration::from_millis(100),
     long_press: Duration::from_millis(200),
+    held_repeat_interval: None,
     mode: Mode::PullUp,
 };
 

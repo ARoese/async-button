@@ -10,8 +10,35 @@ const CONFIG: ButtonConfig = ButtonConfig {
     debounce: Duration::from_millis(10),
     double_click: Duration::from_millis(100),
     long_press: Duration::from_millis(200),
+    held_repeat_interval: None,
     mode: Mode::PullUp,
 };
+
+#[tokio::test]
+async fn held_repeat() {
+    let mut pin = MockPin::new();
+    let mut button = {
+        let pin = pin.clone();
+        Button::new(pin, ButtonConfig {
+            held_repeat_interval: Some(Duration::from_millis(100)),
+            ..CONFIG
+        })
+    };
+
+    tokio::spawn(async move {
+        pin.set_low().await;
+        // long enough to trigger the long press, then two repeated short presses
+        sleep_millis(210+110+110).await;
+        pin.set_high().await;
+    });
+    
+    // long press gets emitted at the start of the series
+    assert_matches!(button.update().await, ButtonEvent::LongPress);
+    // it is only held long enough for 2 repeats, and they are NOT double or triple-clicks
+    assert_matches!(button.update().await, ButtonEvent::ShortPress{count: 1});
+    assert_matches!(button.update().await, ButtonEvent::ShortPress{count: 1});
+    verify_no_event(&mut button).await;
+}
 
 #[tokio::test]
 async fn short_press() {

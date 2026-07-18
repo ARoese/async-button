@@ -148,7 +148,7 @@ where
                 if let Some(repeat_interval) = self.config.held_repeat_interval {
                     match embassy_futures::select::select(
                         self.wait_for_release(),
-                        Timer::after(repeat_interval)
+                        delay(repeat_interval)
                     ).await {
                         Either::First(_) => {},
                         Either::Second(_) => {
