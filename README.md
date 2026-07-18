@@ -6,6 +6,7 @@ Async button handling crate for `no_std` environments. Built around `embedded-ha
 - [x] Debouncing
 - [x] Detect single and multiple short presses
 - [x] Detect long presses
+  - Optionally emit short presses on a specified interval during a long press (repeat-on-hold behavior)
 - [ ] Detect sequences of short and long presses or multiple long presses. Open an issue if this would be useful to you, or submit a PR!
 
 ## Example

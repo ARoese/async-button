@@ -11,6 +11,10 @@ pub struct ButtonConfig {
     pub double_click: Duration,
     /// Time the button is held before a long press is detected.
     pub long_press: Duration,
+    /// If this is Some(), then a long press will cause short presses to be
+    /// emitted repeatedly on this interval until the button is released.
+    /// A long press event will also be emitted at the start of the series.
+    pub held_repeat_interval: Option<Duration>,
     /// Button direction.
     pub mode: Mode,
 }
@@ -21,12 +25,14 @@ impl ButtonConfig {
         debounce: Duration,
         double_click: Duration,
         long_press: Duration,
+        held_repeat_interval: Option<Duration>,
         mode: Mode,
     ) -> Self {
         Self {
             debounce,
             double_click,
             long_press,
+            held_repeat_interval,
             mode,
         }
     }
@@ -38,6 +44,7 @@ impl Default for ButtonConfig {
             debounce: Duration::from_millis(10),
             double_click: Duration::from_millis(350),
             long_press: Duration::from_millis(1000),
+            held_repeat_interval: None,
             mode: Mode::default(),
         }
     }

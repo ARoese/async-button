@@ -3,6 +3,7 @@
 #![warn(missing_docs)]
 
 pub use config::{ButtonConfig, Mode};
+use embassy_futures::select::Either;
 
 mod config;
 
@@ -143,8 +144,21 @@ where
                 None
             }
 
-            State::PendingRelease => {
-                self.wait_for_release().await;
+            State::PendingRelease => 'pending: {
+                if let Some(repeat_interval) = self.config.held_repeat_interval {
+                    match embassy_futures::select::select(
+                        self.wait_for_release(),
+                        Timer::after(repeat_interval)
+                    ).await {
+                        Either::First(_) => {},
+                        Either::Second(_) => {
+                            break 'pending Some(ButtonEvent::ShortPress { count: 1 })
+                        }
+                    }
+                } else {
+                    self.wait_for_release().await;
+                }
+
                 self.debounce_delay().await;
                 if self.is_pin_released() {
                     self.state = State::Idle;
